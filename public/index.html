@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Football Titles Control Panel</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ Управление титрами футбольного матча</h1>
+            <div class="status">
+                <span class="online-status" id="connectionStatus">🟢 Online</span>
+            </div>
+        </header>
+
+        <div class="main-controls">
+            <!-- Счет и команды -->
+            <div class="score-section">
+                <div class="team home">
+                    <input type="text" id="homeName" class="team-name" maxlength="30" placeholder="Название команды хозяев" value="КОМАНДА А">
+                    
+                    <div class="team-color">
+                        <label>Цвет команды:</label>
+                        <input type="color" id="homeColor" class="color-picker" value="#FF0000">
+                        <span class="color-value" id="homeColorValue">#FF0000</span>
+                    </div>
+                    
+                    <div class="team-logo">
+                        <label>Логотип команды:</label>
+                        <div class="logo-container" id="homeLogoContainer">
+                            <img id="homeLogoPreview" class="logo-preview" src="/logos/home_logo.png" alt="Логотип хозяев" onerror="this.src='/logos/placeholder.png'">
+                            <input type="file" id="homeLogoInput" accept="image/png,image/jpeg,image/jpg,image/svg+xml" style="display:none">
+                            <button id="homeLogoBtn" class="btn small">Выбрать логотип</button>
+                            <button id="homeLogoRemoveBtn" class="btn small danger">Удалить</button>
+                        </div>
+                    </div>
+                    
+                    <div class="score-control">
+                        <button class="score-btn minus" data-team="home">-</button>
+                        <span id="homeScore" class="score-value">0</span>
+                        <button class="score-btn plus" data-team="home">+</button>
+                    </div>
+                </div>
+                
+                <div class="vs">VS</div>
+                
+                <div class="team away">
+                    <input type="text" id="awayName" class="team-name" maxlength="30" placeholder="Название команды гостей" value="КОМАНДА Б">
+                    
+                    <div class="team-color">
+                        <label>Цвет команды:</label>
+                        <input type="color" id="awayColor" class="color-picker" value="#0000FF">
+                        <span class="color-value" id="awayColorValue">#0000FF</span>
+                    </div>
+                    
+                    <div class="team-logo">
+                        <label>Логотип команды:</label>
+                        <div class="logo-container" id="awayLogoContainer">
+                            <img id="awayLogoPreview" class="logo-preview" src="/logos/away_logo.png" alt="Логотип гостей" onerror="this.src='/logos/placeholder.png'">
+                            <input type="file" id="awayLogoInput" accept="image/png,image/jpeg,image/jpg,image/svg+xml" style="display:none">
+                            <button id="awayLogoBtn" class="btn small">Выбрать логотип</button>
+                            <button id="awayLogoRemoveBtn" class="btn small danger">Удалить</button>
+                        </div>
+                    </div>
+                    
+                    <div class="score-control">
+                        <button class="score-btn minus" data-team="away">-</button>
+                        <span id="awayScore" class="score-value">0</span>
+                        <button class="score-btn plus" data-team="away">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Остальной код без изменений -->
+            <div class="timer-section">
+                <h3>⏱️ Игровой таймер</h3>
+                <div class="timer-display">
+                    <span id="timerDisplay" class="timer-value">00:00</span>
+                    <span id="halfStatus" class="half-status">1-й тайм</span>
+                </div>
+                <div class="timer-controls">
+                    <button id="startTimerBtn" class="btn timer-btn start">▶ Старт</button>
+                    <button id="stopTimerBtn" class="btn timer-btn stop">⏸ Стоп</button>
+                    <button id="resetTimerBtn" class="btn timer-btn reset">🔄 Сброс</button>
+                    <button id="switchHalfBtn" class="btn timer-btn half">⚡ Смена тайма</button>
+                </div>
+                <div class="time-manual">
+                    <label>Продолжительность тайма:</label>
+                    <input type="number" id="halfDuration" min="1" max="60" value="45" step="1">
+                    <span>мин.</span>
+                    
+                    <label>Текущее время:</label>
+                    <input type="text" id="matchTime" placeholder="MM:SS" value="00:00" maxlength="5">
+                    
+                    <label>Статус:</label>
+                    <select id="half">
+                        <option value="1">1-й тайм</option>
+                        <option value="2">2-й тайм</option>
+                        <option value="ht">Перерыв</option>
+                        <option value="ft">Матч окончен</option>
+                    </select>
+                    
+                    <button id="updateTimeBtn" class="btn">Применить</button>
+                </div>
+            </div>
+
+            <div class="additional-time-section">
+                <h4>⏱️ Добавленное время (до 15 минут)</h4>
+                <div class="additional-time-controls">
+                    <div class="additional-time-item">
+                        <label>1-й тайм:</label>
+                        <input type="number" id="additionalTimeFirst" min="0" max="15" value="0" step="1">
+                        <span>мин.</span>
+                        <button id="applyAdditionalTimeFirst" class="btn small">Применить</button>
+                    </div>
+                    <div class="additional-time-item">
+                        <label>2-й тайм:</label>
+                        <input type="number" id="additionalTimeSecond" min="0" max="15" value="0" step="1">
+                        <span>мин.</span>
+                        <button id="applyAdditionalTimeSecond" class="btn small">Применить</button>
+                    </div>
+                </div>
+                <div class="additional-time-info" style="font-size: 12px; text-align: center; margin-top: 10px; opacity: 0.7;">
+                    ⚡ Добавленное время можно изменять в любой момент. Таймер адаптируется автоматически.
+                </div>
+            </div>
+
+            <div class="events-section">
+                <h3>📋 События матча</h3>
+                <div class="event-buttons">
+                    <button class="event-btn goal" data-event="goal">⚽ ГОЛ</button>
+                    <button class="event-btn substitution" data-event="substitution">🔄 ЗАМЕНА</button>
+                    <button class="event-btn yellow" data-event="yellow-card">🟨 ЖК</button>
+                    <button class="event-btn red" data-event="red-card">🟥 КК</button>
+                </div>
+                
+                <div id="eventForm" style="display: none;">
+                    <div class="form-group">
+                        <input type="text" id="eventPlayer" placeholder="Игрок (номер или имя)" autocomplete="off">
+                        <select id="eventTeam">
+                            <option value="home">Команда хозяев</option>
+                            <option value="away">Команда гостей</option>
+                        </select>
+                        <input type="text" id="eventMinute" placeholder="Минута" value="00" maxlength="2">
+                    </div>
+                    <div id="substitutionFields" style="display: none;">
+                        <input type="text" id="eventPlayerIn" placeholder="Игрок вышел на замену" autocomplete="off">
+                    </div>
+                    <div class="form-actions">
+                        <button id="submitEvent" class="btn success">Показать титр</button>
+                        <button id="cancelEvent" class="btn">Отмена</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="title-controls">
+                <button id="hideTitleBtn" class="btn danger">🙈 Скрыть титр</button>
+                <button id="hideScoreboardBtn" class="btn warning">📺 Скрыть табло</button>
+                <button id="resetMatchBtn" class="btn warning">🔄 Сброс матча</button>
+            </div>
+
+            <div class="history-section">
+                <h3>📜 История событий</h3>
+                <div id="historyList">
+                    <div class="history-empty">Нет событий</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+</body>
+</html>

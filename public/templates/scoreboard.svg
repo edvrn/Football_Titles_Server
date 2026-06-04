@@ -1,0 +1,33 @@
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="{{homeTeamColor}}" stop-opacity="0.3" />
+            <stop offset="50%" stop-color="#000000" stop-opacity="0.85" />
+            <stop offset="100%" stop-color="{{awayTeamColor}}" stop-opacity="0.3" />
+        </linearGradient>
+    </defs>
+    
+    <rect width="800" height="200" fill="url(#bgGrad)" rx="15"/>
+    
+    <!-- Логотип домашней команды -->
+    <image x="15" y="15" width="70" height="70" preserveAspectRatio="xMidYMid meet" xlink:href="{{homeTeamLogo}}"/>
+	
+	    <!-- Логотип гостевой команды -->
+    <image x="715" y="15" width="70" height="70" preserveAspectRatio="xMidYMid meet" xlink:href="{{awayTeamLogo}}"/>
+    
+    <!-- Блок домашней команды -->
+    <rect x="10" y="10" width="380" height="180" fill="{{homeTeamColor}}" opacity="0.15" rx="10"/>
+    <text x="200" y="70" text-anchor="middle" fill="#ffffff" font-size="32" font-weight="bold" font-family="Arial">{{homeTeamName}}</text>
+    <text x="200" y="140" text-anchor="middle" fill="#FFD700" font-size="56" font-weight="bold" font-family="Courier New">{{homeTeamScore}}</text>
+    
+    <!-- Блок гостевой команды -->
+    <rect x="410" y="10" width="380" height="180" fill="{{awayTeamColor}}" opacity="0.15" rx="10"/>
+    <text x="600" y="70" text-anchor="middle" fill="#ffffff" font-size="32" font-weight="bold" font-family="Arial">{{awayTeamName}}</text>
+    <text x="600" y="140" text-anchor="middle" fill="#FFD700" font-size="56" font-weight="bold" font-family="Courier New">{{awayTeamScore}}</text>
+    
+    <!-- Центральный блок с временем -->
+    <rect x="310" y="50" width="180" height="100" fill="#000000" opacity="0.75" rx="8"/>
+    <text x="400" y="85" text-anchor="middle" fill="#FFD700" font-size="34" font-weight="bold" font-family="Courier New">{{matchTime}}</text>
+    <text x="400" y="108" text-anchor="middle" fill="#ff9800" font-size="13" font-weight="bold" font-family="Arial">{{additionalTimeText}}</text>
+    <text x="400" y="132" text-anchor="middle" fill="#aaaaaa" font-size="13" font-weight="bold" font-family="Arial">{{halfText}}</text>
+</svg>

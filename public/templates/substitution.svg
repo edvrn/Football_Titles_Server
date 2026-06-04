@@ -1,0 +1,7 @@
+<svg width="700" height="120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="700" height="120" fill="#2196F3" opacity="0.95" rx="10"/>
+    <rect x="10" y="10" width="680" height="100" fill="none" stroke="white" stroke-width="2" rx="8" stroke-dasharray="5,5"/>
+    <text x="350" y="45" text-anchor="middle" fill="white" font-size="32" font-weight="bold">🔄 Замена</text>
+    <text x="350" y="75" text-anchor="middle" fill="white" font-size="22">{{playerOut}} → {{playerIn}}</text>
+    <text x="350" y="100" text-anchor="middle" fill="#FFD700" font-size="18">{{minute}}' • {{matchStatus}}</text>
+</svg>

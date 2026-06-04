@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Football Titles Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: transparent;
+            overflow: hidden;
+            font-family: 'Arial', 'Segoe UI', sans-serif;
+        }
+        
+        .display-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .scoreboard-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .scoreboard-container img,
+        .scoreboard-container svg {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            filter: drop-shadow(0 4px 15px rgba(0,0,0,0.3));
+        }
+        
+        .title-overlay {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.3s ease-in-out;
+            z-index: 1001;
+            pointer-events: none;
+        }
+        
+        .title-overlay svg {
+            display: block;
+            max-width: 90vw;
+            width: auto;
+            height: auto;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .title-overlay:not(.hidden) {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: lime;
+            font-size: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 9999;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="display-container">
+        <div class="scoreboard-container" id="scoreboardContainer">
+            <img id="scoreboardImg" src="/api/scoreboard" alt="Scoreboard" style="width: 100%; height: auto;">
+        </div>
+        
+        <div class="title-overlay hidden" id="titleOverlay"></div>
+        
+        <div class="debug-info" id="debugInfo">Connecting...</div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const titleOverlay = document.getElementById('titleOverlay');
+        const scoreboardImg = document.getElementById('scoreboardImg');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        let hideTimeout = null;
+        let scoreboardVisible = true;
+        let updateCounter = 0;
+        
+        function debug(message) {
+            console.log('[Display]', message);
+            if (debugInfo) {
+                debugInfo.textContent = message;
+                setTimeout(() => {
+                    if (debugInfo.textContent === message) {
+                        debugInfo.textContent = 'Connected';
+                    }
+                }, 3000);
+            }
+        }
+        
+        function updateScoreboard() {
+            if (scoreboardVisible) {
+                const url = `/api/scoreboard?t=${Date.now()}&c=${++updateCounter}`;
+                scoreboardImg.src = url;
+                debug(`Scoreboard update requested (${updateCounter})`);
+            }
+        }
+        
+        function hideScoreboard() {
+            scoreboardVisible = false;
+            scoreboardImg.style.display = 'none';
+            debug('Scoreboard hidden');
+        }
+        
+        function showScoreboard() {
+            scoreboardVisible = true;
+            scoreboardImg.style.display = 'block';
+            updateScoreboard();
+            debug('Scoreboard shown');
+        }
+        
+        // Прямая загрузка SVG для проверки логотипов
+        async function checkLogos() {
+            try {
+                const response = await fetch('/api/scoreboard');
+                const svgText = await response.text();
+                debug('SVG contains logos: ' + (svgText.includes('/logos/') ? 'YES' : 'NO'));
+                if (svgText.includes('/logos/')) {
+                    // Извлекаем URL логотипов
+                    const homeLogoMatch = svgText.match(/xlink:href="([^"]*home_logo[^"]*)"/);
+                    const awayLogoMatch = svgText.match(/xlink:href="([^"]*away_logo[^"]*)"/);
+                    if (homeLogoMatch) debug(`Home logo URL: ${homeLogoMatch[1]}`);
+                    if (awayLogoMatch) debug(`Away logo URL: ${awayLogoMatch[1]}`);
+                }
+            } catch (error) {
+                debug(`Error checking logos: ${error.message}`);
+            }
+        }
+        
+        socket.on('stateUpdate', (state) => {
+            debug(`State update: ${state.matchTime} - ${state.halfText}`);
+            if (scoreboardVisible) {
+                updateScoreboard();
+                // Проверяем логотипы после обновления
+                setTimeout(() => checkLogos(), 100);
+            }
+            
+            if (state.titleVisible && state.activeTitle && state.activeTitle.svg) {
+                debug(`Showing title: ${state.activeTitle.type}`);
+                titleOverlay.innerHTML = state.activeTitle.svg;
+                titleOverlay.classList.remove('hidden');
+                
+                if (hideTimeout) clearTimeout(hideTimeout);
+                
+                hideTimeout = setTimeout(() => {
+                    debug('Auto-hiding title');
+                    titleOverlay.classList.add('hidden');
+                    titleOverlay.innerHTML = '';
+                    hideTimeout = null;
+                }, 5000);
+            } else if (!state.titleVisible) {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                titleOverlay.classList.add('hidden');
+                titleOverlay.innerHTML = '';
+            }
+        });
+        
+        socket.on('hideTitle', () => {
+            debug('Hide title command');
+            if (hideTimeout) clearTimeout(hideTimeout);
+            titleOverlay.classList.add('hidden');
+            titleOverlay.innerHTML = '';
+        });
+        
+        socket.on('hideScoreboard', () => {
+            debug('Hide scoreboard command');
+            hideScoreboard();
+            
+            setTimeout(() => {
+                showScoreboard();
+                debug('Scoreboard auto-shown after 10 seconds');
+            }, 10000);
+        });
+        
+        socket.on('connect', () => {
+            debug('Connected to server');
+            debugInfo.style.color = 'lime';
+            showScoreboard();
+            setTimeout(() => checkLogos(), 500);
+        });
+        
+        socket.on('disconnect', () => {
+            debug('Disconnected from server');
+            debugInfo.style.color = 'red';
+        });
+        
+        socket.on('connect_error', (error) => {
+            debug(`Connection error: ${error.message}`);
+            debugInfo.style.color = 'red';
+        });
+        
+        // Обновляем табло каждую секунду
+        setInterval(() => {
+            if (socket.connected && scoreboardVisible) {
+                updateScoreboard();
+            }
+        }, 1000);
+        
+        window.addEventListener('focus', () => {
+            debug('Window focused, refreshing');
+            if (scoreboardVisible) {
+                updateScoreboard();
+            }
+        });
+        
+        debug('Display page loaded');
+        
+        setTimeout(() => {
+            if (scoreboardVisible) {
+                updateScoreboard();
+                checkLogos();
+            }
+        }, 500);
+    </script>
+</body>
+</html>
